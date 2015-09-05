@@ -2,3 +2,5 @@
  - npm install -g nodemon
  - npm install --global babel
  - npm install
+
+DEV
