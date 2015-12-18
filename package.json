@@ -1,13 +1,13 @@
 {
   "devDependencies": {
+    "babel-cli": "^6.3.17",
+    "express": "*",
     "gulp": "*",
     "gulp-babel": "*",
     "gulp-sourcemaps": "*",
-    "source-map-support": "*",
     "http": "0.0.0",
-    "mysql": "^2.9.0"
+    "mysql": "^2.9.0",
+    "source-map-support": "*"
   },
-  "dependencies": {
-
-  }
+  "dependencies": {}
 }

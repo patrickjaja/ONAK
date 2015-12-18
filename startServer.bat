@@ -1,1 +1,1 @@
-nodemon --exec "babel-node" server_es6.js
+nodemon ./core/server_es6.js

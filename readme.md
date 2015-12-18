@@ -1,6 +1,6 @@
- * Open Node Application Kit
+ * Open Node Application Kit - node 5.3
  - npm install && gulp watch
-
+ - npm install -g babel-cli
 DEV
 
  * Starting by gulp watch
@@ -13,6 +13,7 @@ DEV
 
  * Others
 	* IntelliJ Stuff
+	    - https://youtrack.jetbrains.com/oauth?state=%2Fissue%2FIDEA-139990
  		- http://blog.jetbrains.com/webstorm/2015/05/ecmascript-6-in-webstorm-transpiling/
 	* ES6 Classes Introduction
 		- http://www.2ality.com/2015/02/es6-classes-final.html
