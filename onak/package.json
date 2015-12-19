@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "express": "*",
+    "http": "0.0.0",
+    "mysql": "^2.9.0",
+    "validator": "^4.4.0",
+    "chokidar": "^1.4.1"
+  },
+  "dependencies": {
+
+  }
+}

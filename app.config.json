@@ -2,5 +2,6 @@
     "name": "noderest",
     "description": "Demo REST API with Node",
     "version": "0.0.1",
-    "port": "3001"
+    "port": "3001",
+    "apidir": ""
 }
