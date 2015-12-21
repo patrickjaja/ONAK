@@ -2,24 +2,37 @@
 console.log("STARRT");
 
 let express = require('express');
-let coreException = require('./EXCEPTIONS/class.coreException.js');
+let coreException = require('./exceptions/class.coreException.js');
 let validator = require('validator');
 let chokidar = require('chokidar');
 let path = require('path');
 //TODO: Prüfen ob die Datei existiert, sonst Fallback auf default.config.json
 //TODO: app.config und default.config mergen, damit fehlende configs gefüllt sind
+//http://localhost:3000/?class=Example1Class&function=example1Function1
 let config = require('../app.config.json');
 
 class Server {
-    constructor(name) {
-        this.APIDIR = `../api/`;
-        this.APIDESCDIR = `./api${path.sep}DESC`;
-        this.watchExpr = `${this.APIDESCDIR}${path.sep}*.json`;
-        this.name = name;
-        this.apiregister = [];
+    constructor(apiDir) {
+        this.BASEDIR = __dirname;
+        this.APIDIR = apiDir;
+        this.watchExpr = `${this.APIDIR}${path.sep}**/*.json`;
+        this.apiRegister = {};
         this.coreParams = ['class','function'];
         this.defaultModuleExtension = ".js";
         this.test=0;
+
+        this.parsedAPI={};
+        /****STATS***/
+        this.serverUpTime="";
+        this.incommingRequests="";
+
+        /**PRIVATE**/
+        this._rawAPI = [];
+
+        this.setup();
+        console.log("Cons");
+    }
+    setup() {
         this.initFileWatcher();
     }
     initFileWatcher() {
@@ -28,11 +41,34 @@ class Server {
         });
 
         this.watcher
-            .on('add', path => console.log(`File ${path} has been added`))
-            .on('change', path => console.log(`File ${path} has been changed`))
-            .on('unlink', path => console.log(`File ${path} has been removed`));
+            .on('add', (watchPath) => {
+                this.parseAPIFile(watchPath);
+            })
+            .on('change', watchPath => {
+                this.parseAPIFile(watchPath);
+            })
+            .on('unlink', watchPath => {
+                this.parseAPIFile(watchPath);
+            });
 
         this.watcher.add([this.watchExpr]);
+    }
+    parseAPIFile(apiFilePath) {
+        try {
+
+            require.resolve(apiFilePath);
+
+            var file=require(apiFilePath);
+            var className=file.className;
+            this._rawAPI.push(file);
+            if (!className) {
+                throw(apiFilePath + " undefined className");
+            }
+            this.parsedAPI[className]=file;
+        } catch (e) {
+            console.log(e);
+        }
+
     }
     start() {
         let app = express();
@@ -91,7 +127,7 @@ class Server {
             //if () {
             try {
                 let rqParameters=options[0].response;
-                let module=__dirname+path.sep+this.APIDIR+rqParameters["class"]
+                let module=this.APIDIR+rqParameters["class"]
                                         +this.defaultModuleExtension;
                 require.resolve(module);
                 let mountedModule=require(module);

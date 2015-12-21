@@ -17,11 +17,11 @@ var _mysql = require('mysql');
 
 var _mysql2 = _interopRequireDefault(_mysql);
 
-var _LOGClassLoggingJs = require('../LOG/class.logging.js');
+var _LOGClassLoggingJs = require('../log/class.logging.js');
 
 var _LOGClassLoggingJs2 = _interopRequireDefault(_LOGClassLoggingJs);
 
-var _EXCEPTIONSClassSqlExceptionJs = require('../EXCEPTIONS/class.sqlException.js');
+var _EXCEPTIONSClassSqlExceptionJs = require('../exceptions/class.sqlException.js');
 
 var _EXCEPTIONSClassSqlExceptionJs2 = _interopRequireDefault(_EXCEPTIONSClassSqlExceptionJs);
 

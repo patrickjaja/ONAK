@@ -1,0 +1,31 @@
+{
+  "className": "Example1Class",
+  "functions": [{
+    "functionName": "example1Function1",
+    "parameters": [{
+      "example1Parameter1": {
+        "required": true,
+        "type": "isAlphanumeric"
+      }
+    }, {
+      "example1Parameter2": {
+        "required": false,
+        "type": "isAlpha"
+      }
+    }]
+  }, {
+    "functionName": "example1Function2",
+    "parameters": [{
+      "example1Parameter1": {
+        "required": true,
+        "type": "isAlphanumeric"
+      }
+    }, {
+      "example1Parameter2": {
+        "required": false,
+        "type": "isAlpha"
+      }
+    }]
+  }],
+  "apiDescription": "Cool Func"
+}
