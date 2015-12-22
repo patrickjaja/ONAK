@@ -58,8 +58,8 @@ class Server {
 
             require.resolve(apiFilePath);
 
-            var file=require(apiFilePath);
-            var className=file.className;
+            let file=require(apiFilePath);
+            let className=file.className;
             this._rawAPI.push(file);
             if (!className) {
                 throw(apiFilePath + " undefined className");
@@ -110,14 +110,21 @@ class Server {
     parseCoreParams(paramsObj) {
         var promise = new Promise((resolve, reject) => {
             var parsedParams={};
-            this.coreParams.forEach((value, key) => {
+            var allParams={};
+            //ToDO: Mit klassen Funktionsparams mergen damit alle gewünschten Params der Funktion übergeben werden können
+            for (let value in paramsObj) {
                 var aParam=paramsObj[value];
-                if (/[^a-zA-Z0-9]/.test(aParam)) {
-                    reject("Not valid Param.", param);
+                if ((this.coreParams.indexOf(value) > -1)) {
+
+                    //if (/[^a-zA-Z0-9]/.test(aParam)) {
+                    //    reject("Not valid Param.", param);
+                    //}
+                    parsedParams[value] = aParam;
                 }
-                parsedParams[value] = aParam;
-            });
-            resolve({response:parsedParams
+                allParams[value] = aParam;
+            }
+
+            resolve({response:allParams
                     , request: paramsObj});
         });
         return promise;
