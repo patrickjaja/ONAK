@@ -7,6 +7,6 @@
     "chokidar": "^1.4.1"
   },
   "dependencies": {
-
+    "syntax-error": "^1.1.4"
   }
 }

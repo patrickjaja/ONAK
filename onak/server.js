@@ -1,18 +1,34 @@
 'use strict';
 console.log("STARRT");
 
-let express = require('express');
-let coreException = require('./exceptions/class.coreException.js');
-let validator = require('validator');
-let chokidar = require('chokidar');
-let path = require('path');
+const express = require('express');
+const coreException = require('./exceptions/class.coreException.js');
+const validator = require('validator');
+const chokidar = require('chokidar');
+const CustomError = require('./exceptions/customError');
+const EventEmitter = require('events');
+
+const Loader = require('../onak/loader/loader');
+
+const path = require('path');
 //TODO: Prüfen ob die Datei existiert, sonst Fallback auf default.config.json
 //TODO: app.config und default.config mergen, damit fehlende configs gefüllt sind
 //http://localhost:3000/?class=Example1Class&function=example1Function1
 let config = require('../app.config.json');
 
-class Server {
+var myObject = {};
+
+
+/**
+ * ONAK Server Events:
+ *  - error
+ *  - started
+ *  - onAPICall
+ * */
+class Server extends EventEmitter{
     constructor(apiDir) {
+        //EventEmitter.call(this);
+        super();
         this.BASEDIR = __dirname;
         this.APIDIR = apiDir;
         this.watchExpr = `${this.APIDIR}${path.sep}**/*.json`;
@@ -30,6 +46,7 @@ class Server {
         this._rawAPI = [];
 
         this.setup();
+        this.emit('started', "");
         console.log("Cons");
     }
     setup() {
@@ -83,14 +100,30 @@ class Server {
                     let funcObj=functionObj[0].response;
                     let funcName=functionObj[0].request[0].request.function;
                     if (typeof(funcObj[funcName]) == "function") {
-                        funcObj[funcName].call();
-                        funcObj["load"].call();
+                        this.emit('onAPICall', {'func':funcObj[funcName]
+                                    , 'functionObj':functionObj,funcName });
+                        funcObj[funcName]();
+
+                        //funcObj["load"].call();
                         this.test++;
                     }
                 })
-               .catch(function(err) {
-                    console.log(err);
-                });
+                .catch((err) => {
+                     this.emit('error', new CustomError(err));
+                     //Error.captureStackTrace(myerr);
+                     //console.log(myerr.stack);
+                     //console.log(myerr);
+
+                     //throw new SyntaxError("Unexpected token!!!", err);
+                     //console.log(err);
+                     //try {
+                     //    throw AppError('unable to connect db due to error: ' + err);
+                     //}catch(e) {
+                     //    console.log(e);
+                     //}
+
+                 });
+
             res.send('Hello World!');
         });
 
@@ -136,8 +169,8 @@ class Server {
                 let rqParameters=options[0].response;
                 let module=this.APIDIR+rqParameters["class"]
                                         +this.defaultModuleExtension;
-                require.resolve(module);
-                let mountedModule=require(module);
+
+                let mountedModule=Loader.getFile(module);
                 resolve({response:mountedModule, request: options});
             } catch(e) {
                 reject(e);

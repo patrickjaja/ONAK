@@ -1,9 +1,9 @@
 'use strict';
 
-let Item = require('../onak/item/class.Item.js');
+let APIService = require('../onak/APIService/APIService');
 
 
-class Example2Class extends Item {
+class Example2Class extends APIService {
     constructor() {
         console.log("Aufträge Konstruktor geladen.");
         super();
