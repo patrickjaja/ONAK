@@ -3,13 +3,13 @@ const Loader = require('../onak/loader/loader');
 
 class Example1Class extends APIService {
     constructor() {
-        console.log("Auftrï¿½ge Konstruktor geladen.1112");
+        console.log("Aufträge Konstruktor geladen.");
         super();
     }
     example1Function1(parameter) {
         //let mysqlObj=new MySQL("");
         let mysql = this.getFile(__dirname+'/../onak/dataadapter/mysql.js');
-        console.log("Alles geladen24");
+        console.log("Alles geladen");
     }
 }
-module.exports=Example1Class;
+module.exports=new Example1Class();

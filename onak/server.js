@@ -170,7 +170,11 @@ class Server extends EventEmitter{
                 let module=this.APIDIR+rqParameters["class"]
                                         +this.defaultModuleExtension;
 
+                //Prevent Webservices to be cached
+                delete require.cache[require.resolve(module)];
                 let mountedModule=Loader.getFile(module);
+
+                mountedModule=new mountedModule();
                 resolve({response:mountedModule, request: options});
             } catch(e) {
                 reject(e);
