@@ -12,8 +12,9 @@ class MYSQL {
         this.user=user;
         this.password=password;
         this.connectionLimit = 10;
+        this.connection={};
         console.log("MySQL Konstruktor");
-        //this.connect();
+        this.connect();
     }
     connect() {
         this.pool  = mysql.createPool({
@@ -28,13 +29,7 @@ class MYSQL {
 
         this._applyPoolConfig();
 
-        this.pool.getConnection(function(err, connection) {
-            if (err) {
-                console.log(err);
-                //new sqlException(err);
-            }
-            this.connection=connection;
-        });
+
     }
     _bindEvents() {
         this.pool.on('connection', function (connection) {
@@ -59,17 +54,28 @@ class MYSQL {
         //2bd
     }
     sendSQL(query="SELECT * FROM table", values={param:"val"}) {
-        this.connection.query(query, values, function(err, result) {
-            if (err) {
-                console.log(err);
+        let promise = new Promise((resolve, reject) => {// do a thing, possibly async, then…
+            //if () {
+            try {
+                this.pool.getConnection((err, connection) => {
+                    if (err) {
+                        reject(err);
+                    }
+                    console.log("connection active");
+                    connection.query(query, values, function(err, result) {
+                        if (err) {
+                            reject(err);
+                        }
+                        resolve({response:result});
+                    });
+
+                    //connection.release()
+                });
+            } catch(e) {
+                reject(e);
             }
-            console.log("GOGO",result);
         });
-        //this.connection.query("SELECT * FROM `users` WHERE username = :title", { title: "test1" }, function(err, result) {
-        //    if (err) throw err;
-        //    console.log("GOGO",result);
-        //});
-        this.connection.release();
+        return promise;
     }
 }
 

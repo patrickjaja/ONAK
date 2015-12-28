@@ -28,6 +28,7 @@ class APIService { //extends Error {
         } catch (e) {
             return e;
         }
+        //delete require.cache[require.resolve(path)];
         return require(path);
     }
     //loadFile(path) {

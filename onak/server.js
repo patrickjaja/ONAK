@@ -99,32 +99,33 @@ class Server extends EventEmitter{
                 .then((functionObj) => {
                     let funcObj=functionObj[0].response;
                     let funcName=functionObj[0].request[0].request.function;
+                    let parameters={};
                     if (typeof(funcObj[funcName]) == "function") {
-                        this.emit('onAPICall', {'func':funcObj[funcName]
-                                    , 'functionObj':functionObj,funcName });
-                        funcObj[funcName]();
+                        this.emit('onAPICall', {
+                            'func': funcObj[funcName]
+                            , 'functionObj': functionObj, funcName
+                        });
 
-                        //funcObj["load"].call();
-                        this.test++;
+                        //Call Function and promise to get output
+                        //If no output, send default empty output
+                        //combine output with default server response
+                        return funcObj[funcName](parameters);
+                        //}
+                    } else {
+                        this.emit('error', new CustomError("Unknown function."));
                     }
                 })
+                .then(this.parseAPIServiceResponse).then(
+                    (parsedResponse) => {
+                        console.log("PROMISE BEENDET");
+                        console.log(parsedResponse);
+                        res.send(JSON.stringify(parsedResponse));
+                    })
                 .catch((err) => {
                      this.emit('error', new CustomError(err));
-                     //Error.captureStackTrace(myerr);
-                     //console.log(myerr.stack);
-                     //console.log(myerr);
-
-                     //throw new SyntaxError("Unexpected token!!!", err);
-                     //console.log(err);
-                     //try {
-                     //    throw AppError('unable to connect db due to error: ' + err);
-                     //}catch(e) {
-                     //    console.log(e);
-                     //}
-
                  });
 
-            res.send('Hello World!');
+            //SERVER KACKT AB, BUT WHY?
         });
 
         var server = app.listen(3000, ()=> {
@@ -133,6 +134,18 @@ class Server extends EventEmitter{
 
             console.log('Example app listening at http://%s:%s', host, port);
         });
+    }
+    parseAPIServiceResponse(apiResponse) {
+        let promise = new Promise((resolve, reject) => {
+            //if () {
+            try {
+                //HIER WEITER
+                resolve({response:apiResponse});
+            } catch(e) {
+                reject(e);
+            }
+        });
+        return promise;
     }
     checkUser(){
 
