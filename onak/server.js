@@ -103,22 +103,26 @@ class Server extends EventEmitter{
                     if (typeof(funcObj[funcName]) == "function") {
                         this.emit('onAPICall', {
                             'func': funcObj[funcName]
-                            , 'functionObj': functionObj, funcName
+                            ,'functionObj': functionObj, funcName
                         });
 
                         //Call Function and promise to get output
                         //If no output, send default empty output
                         //combine output with default server response
+                        //funcObj[funcName](parameters);
+                        //TODO: evtl Promise.all( and multiple function calls)
                         return funcObj[funcName](parameters);
                         //}
                     } else {
                         this.emit('error', new CustomError("Unknown function."));
                     }
                 })
+                //Stürtzt ab irgendwie?
                 .then(this.parseAPIServiceResponse).then(
                     (parsedResponse) => {
                         console.log("PROMISE BEENDET");
-                        console.log(parsedResponse);
+                        //console.log(parsedResponse);
+                        //res.send(JSON.stringify(parsedResponse));
                         res.send(JSON.stringify(parsedResponse));
                     })
                 .catch((err) => {

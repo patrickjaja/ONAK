@@ -28,6 +28,7 @@ class APIService { //extends Error {
         } catch (e) {
             return e;
         }
+        //without caching ~30 ms +++
         //delete require.cache[require.resolve(path)];
         return require(path);
     }

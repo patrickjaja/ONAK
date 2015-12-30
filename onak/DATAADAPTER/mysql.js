@@ -2,6 +2,8 @@
 /**
  * Created by root on 30.08.2015.
  */
+
+//https://github.com/felixge/node-mysql#preparing-queries
 const mysql = require('mysql');
 //import sqlException from '../EXCEPTIONS/class.sqlException.js'
 
@@ -50,13 +52,22 @@ class MYSQL {
             }.bind(this));
         };
     }
-    prepSQL(query) {
-        //2bd
+    debugSQL(query="SELECT * FROM table", values={param:"val"}) {
+        var sql = query;
+        var inserts = values;
+        this.sql = mysql.format(sql, inserts);
+        return this.sql;
     }
-    sendSQL(query="SELECT * FROM table", values={param:"val"}) {
+    //vllt Format umstellen
+    sendSQL(query="SELECT * FROM table", values={param:"val"}, debug=false) {
         let promise = new Promise((resolve, reject) => {// do a thing, possibly async, then…
             //if () {
             try {
+                if (debug) {
+                    this.sql=mysql.format(query, values);
+                    resolve(this.sql);
+                    console.log("HIER GEHTS WEITER");
+                }
                 this.pool.getConnection((err, connection) => {
                     if (err) {
                         reject(err);
@@ -66,7 +77,7 @@ class MYSQL {
                         if (err) {
                             reject(err);
                         }
-                        resolve({response:result});
+                        resolve(result);
                     });
 
                     //connection.release()
