@@ -16,7 +16,7 @@ const path = require('path');
 //http://localhost:3000/?class=Example1Class&function=example1Function1
 let config = require('../app.config.json');
 
-var myObject = {};
+let myObject = {};
 
 
 /**
@@ -88,9 +88,13 @@ class Server extends EventEmitter{
 
     }
     start() {
+        //TODO: Check performance by using the basic http server
         let app = express();
 
         app.get('/', (req, res) =>  {
+            let startTime=process.hrtime();
+            let stopTime=0;
+            let params={};
             Promise.all([this.parseCoreParams(req.query)])
                 .then((data) => {
                     return Promise.all([this.getClass(data)
@@ -105,46 +109,51 @@ class Server extends EventEmitter{
                             'func': funcObj[funcName]
                             ,'functionObj': functionObj, funcName
                         });
-
-                        //Call Function and promise to get output
-                        //If no output, send default empty output
-                        //combine output with default server response
-                        //funcObj[funcName](parameters);
-                        //TODO: evtl Promise.all( and multiple function calls)
                         return funcObj[funcName](parameters);
-                        //}
                     } else {
                         this.emit('error', new CustomError("Unknown function."));
                     }
                 })
-                //Stürtzt ab irgendwie?
-                .then(this.parseAPIServiceResponse).then(
-                    (parsedResponse) => {
-                        console.log("PROMISE BEENDET");
-                        //console.log(parsedResponse);
-                        //res.send(JSON.stringify(parsedResponse));
-                        res.send(JSON.stringify(parsedResponse));
-                    })
+                .then(this.parseAPIServiceResponse)
+                .then((preparedOutput) => {
+                    return this.outSuccess(preparedOutput,res,startTime);
+                })
                 .catch((err) => {
                      this.emit('error', new CustomError(err));
                  });
-
-            //SERVER KACKT AB, BUT WHY?
         });
 
-        var server = app.listen(3000, ()=> {
-            var host = server.address().address;
-            var port = server.address().port;
+        let server = app.listen(3000, ()=> {
+            let host = server.address().address;
+            let port = server.address().port;
 
             console.log('Example app listening at http://%s:%s', host, port);
         });
     }
+    outSuccess(content,response,startTime) {
+        let promise = new Promise((resolve, reject) => {
+            try {
+                let out={};
+                //TODO: Check if output is defined, else reject
+                out.content=content.output;
+                out.duration= process.hrtime(startTime)[1] / 1000000000;
+                this.sendJSON(out,response);
+                resolve(content);
+            } catch(e) {
+                reject(e);
+            }
+        });
+        return promise;
+    }
+    sendJSON(o,r) {
+        r.setHeader('Content-Type', 'application/json');
+        r.send(JSON.stringify(o));
+    }
     parseAPIServiceResponse(apiResponse) {
         let promise = new Promise((resolve, reject) => {
-            //if () {
             try {
-                //HIER WEITER
-                resolve({response:apiResponse});
+                //TODO: Parse Output? UTF8 Encoding?
+                resolve(apiResponse);
             } catch(e) {
                 reject(e);
             }
@@ -158,12 +167,12 @@ class Server extends EventEmitter{
         params = iterable Object
      */
     parseCoreParams(paramsObj) {
-        var promise = new Promise((resolve, reject) => {
-            var parsedParams={};
-            var allParams={};
+        let promise = new Promise((resolve, reject) => {
+            let parsedParams={};
+            let allParams={};
             //ToDO: Mit klassen Funktionsparams mergen damit alle gewünschten Params der Funktion übergeben werden können
             for (let value in paramsObj) {
-                var aParam=paramsObj[value];
+                let aParam=paramsObj[value];
                 if ((this.coreParams.indexOf(value) > -1)) {
 
                     //if (/[^a-zA-Z0-9]/.test(aParam)) {

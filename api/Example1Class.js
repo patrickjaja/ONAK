@@ -11,7 +11,7 @@ class Example1Class extends APIService {
             try {
                 let mysql = this.getFile(__dirname+'/../onak/dataadapter/mysql.js');
                 let mysqlObj=new mysql("localhost", "trace2", "root", "ZuDQOqtmqlFLeHQ2x39c");
-                mysqlObj.sendSQL("SELECT * FROM user WHERE ?", {userUID:"pschoen"}, true).then(function(result) {
+                mysqlObj.sendSQL("SELECT * FROM user WHERE ?", {userUID:"pschoen"}).then(function(result) {
                     resolve({output:result});
             }).catch(function(err) {
                 reject(err);
