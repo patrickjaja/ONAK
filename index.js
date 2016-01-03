@@ -5,9 +5,11 @@
 
 const path = require('path');
 const Server = require('./onak/server.js');
-let ONAKServer = new Server(__dirname+path.sep+"api/");
+let ONAKServer = new Server(__dirname+path.sep+"api/services/");
 let myerr = {}
-  ONAKServer.start();
+
+ONAKServer.start();
+
 ONAKServer.on('error', function(err){
   // handle the error safely
   console.log(err);

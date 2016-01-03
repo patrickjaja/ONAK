@@ -8,7 +8,7 @@ const chokidar = require('chokidar');
 const CustomError = require('./exceptions/customError');
 const EventEmitter = require('events');
 
-const Loader = require('../onak/loader/loader');
+const Loader = require('./loader/loader');
 
 const path = require('path');
 //TODO: Prüfen ob die Datei existiert, sonst Fallback auf default.config.json
@@ -36,6 +36,8 @@ class Server extends EventEmitter{
         this.coreParams = ['class','function'];
         this.defaultModuleExtension = ".js";
         this.test=0;
+        this.version="0.0";
+        this.defaultDataadapter="mysql";
 
         this.parsedAPI={};
         /****STATS***/
@@ -97,19 +99,21 @@ class Server extends EventEmitter{
             let params={};
             Promise.all([this.parseCoreParams(req.query)])
                 .then((data) => {
-                    return Promise.all([this.getClass(data)
-                                    , this.checkUser(data)]);
+                    params=data[0].response;
+                    return Promise.all([this.getClass(params.class,params.function)]);
                 })
-                .then((functionObj) => {
-                    let funcObj=functionObj[0].response;
-                    let funcName=functionObj[0].request[0].request.function;
-                    let parameters={};
+                .then((mountedModule) => {
+
+                    if (mountedModule[0].requireUser) {
+                        //TODO: GIVE CURRUSER OBJ TO FUNC
+                        //return this.checkUser(funcObj)
+                    } else {
+                        //GO ON WITHOUT USER OBJ
+                    }
+                    let funcObj= new mountedModule[0](params);
+                    let funcName=params.function;
                     if (typeof(funcObj[funcName]) == "function") {
-                        this.emit('onAPICall', {
-                            'func': funcObj[funcName]
-                            ,'functionObj': functionObj, funcName
-                        });
-                        return funcObj[funcName](parameters);
+                        return funcObj[funcName](params);
                     } else {
                         this.emit('error', new CustomError("Unknown function."));
                     }
@@ -119,7 +123,10 @@ class Server extends EventEmitter{
                     return this.outSuccess(preparedOutput,res,startTime);
                 })
                 .catch((err) => {
-                     this.emit('error', new CustomError(err));
+                    //Output error to caller
+                    this.outNoSuccess(err,res,startTime);
+                    //Trigger error event for third party apps
+                    this.emit('error', new CustomError(err));
                  });
         });
 
@@ -136,6 +143,27 @@ class Server extends EventEmitter{
                 let out={};
                 //TODO: Check if output is defined, else reject
                 out.content=content.output;
+                out.status= "OK";
+                out.code=200;
+                out.version=this.version;
+                out.duration= process.hrtime(startTime)[1] / 1000000000;
+                this.sendJSON(out,response);
+                resolve(content);
+            } catch(e) {
+                reject(e);
+            }
+        });
+        return promise;
+    }
+    outNoSuccess(content,response,startTime) {
+        let promise = new Promise((resolve, reject) => {
+            try {
+                let out={};
+                //TODO: Check if output is defined, else reject
+                out.content=content;
+                out.status= "ERROR";
+                out.code=500;
+                out.version=this.version;
                 out.duration= process.hrtime(startTime)[1] / 1000000000;
                 this.sendJSON(out,response);
                 resolve(content);
@@ -160,7 +188,22 @@ class Server extends EventEmitter{
         });
         return promise;
     }
-    checkUser(){
+    checkUser(options){
+        let promise = new Promise((resolve, reject) => {// do a thing, possibly async, then…
+            //if () {
+            try {
+                let rqParameters=options[0].response;
+                let user=this.APIDIR+rqParameters["skey"];
+
+
+                resolve({response:user});
+            } catch(e) {
+                reject(e);
+            }
+        });
+        return promise;
+    }
+    loadUser(skey) {
 
     }
     /*
@@ -188,20 +231,17 @@ class Server extends EventEmitter{
         });
         return promise;
     }
-    getClass(options) {
+    getClass(className) {
         let promise = new Promise((resolve, reject) => {// do a thing, possibly async, then…
             //if () {
             try {
-                let rqParameters=options[0].response;
-                let module=this.APIDIR+rqParameters["class"]
+                let module=this.APIDIR+className
                                         +this.defaultModuleExtension;
 
                 //Prevent Webservices to be cached
                 delete require.cache[require.resolve(module)];
                 let mountedModule=Loader.getFile(module);
-
-                mountedModule=new mountedModule();
-                resolve({response:mountedModule, request: options});
+                resolve(mountedModule);
             } catch(e) {
                 reject(e);
             }

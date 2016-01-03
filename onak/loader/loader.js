@@ -3,7 +3,7 @@
  */
 'use strict';
 class Loader { //extends Error {
-    constructor(message) {
+    constructor() {
 
     }
     getFile(path) {
@@ -24,8 +24,10 @@ class Loader { //extends Error {
         } catch (e) {
             return e;
         }
+        //without caching ~30 ms +++
+        //delete require.cache[require.resolve(path)];
         return require(path);
     }
 }
 
-module.exports = new Loader;
+module.exports = new Loader();

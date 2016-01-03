@@ -2,14 +2,15 @@
  * Created by root on 30.08.2015.
  */
 
-class APIService { //extends Error {
-    constructor(message) {
+const Loader = require('../loader/loader');
+
+class APIService  { //extends Error {
+    constructor() {
         console.log("ITEM CONSTRUKTOR geladen");
     }
     load() {
         console.log("ITEM LOAD");
     }
-    /**Default API Functions**/
     getFile(path) {
         var fs = require('fs');
         var check = require('syntax-error');
@@ -31,6 +32,11 @@ class APIService { //extends Error {
         //without caching ~30 ms +++
         //delete require.cache[require.resolve(path)];
         return require(path);
+    }
+    getDB() {
+        let db= new (this.getFile(__dirname+'/../dataadapter/Dataadapter.js'))();
+        let mydb=db.getDB();
+        return mydb;
     }
     //loadFile(path) {
     //    var fs = require('fs');

@@ -15,23 +15,31 @@ class MYSQL {
         this.password=password;
         this.connectionLimit = 10;
         this.connection={};
+        this.pool=false;
         console.log("MySQL Konstruktor");
         this.connect();
     }
+    getDB() {
+        if (this.pool) {
+            console.log("IST CONNECTED");
+        } else {
+            console.log("IST NICHT CONNECTED");
+        }
+    }
     connect() {
-        this.pool  = mysql.createPool({
-            connectionLimit : this.connectionLimit,
-            host            : this.host,
-            user            : this.user,
-            password        : this.password,
-            database        : this.dbname
-        });
+        if (!this.pool) {
+            this.pool = mysql.createPool({
+                connectionLimit: this.connectionLimit,
+                host: this.host,
+                user: this.user,
+                password: this.password,
+                database: this.dbname
+            });
 
-        this._bindEvents();
+            this._bindEvents();
 
-        this._applyPoolConfig();
-
-
+            this._applyPoolConfig();
+        }
     }
     _bindEvents() {
         this.pool.on('connection', function (connection) {
